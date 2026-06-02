@@ -237,7 +237,11 @@ class DataInspector:
         cols = [c for c in cols if c in self.categorical_columns]
         if not cols: return pd.DataFrame()
 
-        subset = self.df[cols].fillna("Missing")
+        subset = self.df[cols].copy()
+        for col in subset.columns:
+            if isinstance(subset[col].dtype, pd.CategoricalDtype):
+                subset[col] = subset[col].astype(object)
+        subset = subset.fillna("Missing")
 
         if method == "onehot":
             return pd.get_dummies(subset, columns=cols, dtype=int)
